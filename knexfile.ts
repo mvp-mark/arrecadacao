@@ -1,5 +1,7 @@
 // Update with your config settings.
 // const mdb = require("knex-mariadb");
+import path from "path";
+
 
 
 module.exports = {

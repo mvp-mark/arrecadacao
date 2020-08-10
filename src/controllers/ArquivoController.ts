@@ -11,14 +11,15 @@ class ArquivoController {
   async create(req: Request, res: Response) {
     var file = {};
     let i: any = 0;
+    const filename = req.file.filename;
     const arrecadacao = {
-      arr: req.file.filename,
+      arr: filename,
     };
-    console.log("passou por aqui", req.file.filename);
+    console.log("passou por aqui", arrecadacao);
 
     const trx = await connection.transaction();
     try {
-      fs.readFile(req.file.path, function (err, data) {
+      fs.readFile(req.file.path, async function (err, data) {
         if (err) throw err;
         var array = data.toString().split("\n");
         var size = array.length;
@@ -47,16 +48,14 @@ class ArquivoController {
           },
         ];
         console.log(test);
-        
 
-        trx("arquivo")
+        await trx("arquivo")
           .insert(test)
           .then(() => {
-            console.log("entrou");
-            return res.json({ test });
+            console.log("entrou o cabeçalho");
+            // return res.json({ test });
           })
           // .catch((err) => {
-          //   console.log(err);
           //   throw err;
           // })
           .finally(() => trx.destroy);
@@ -86,39 +85,47 @@ class ArquivoController {
               idArquivo: array[0].substring(73, 79),
             }),
               // (linha[i - 1] = linhaBody);
-              linha[i - 1] = linhaBody;
+              (linha[i - 1] = linhaBody);
           }
           // console.log('----------------------------',i);
         }
-        console.log(linha);
-        trx("boleto")
+        // console.log(linha);
+        await trx("boleto")
           .insert(linha)
           .then(() => {
             console.log("entrou os boletos");
-            // return res.json({ linha }
+            // return res.json({ linha });
             // );
-          });
+          })
+          // .catch((err) => {
+          //   trx.rollback();
+          //   // return res.status(400).json({
+          //   //   error: "Unexpected error while creating new class",
+          //   // });
+          //   throw err;
+          // })
 
-        // .catch(e) {
-        //    trx.rollback();
-        //   return response.status(400).json({
-        //     error: "Unexpected error while creating new class",
-        //   });
-        // }
+          .finally(() => trx.destroy);
 
-        // .finally(() => trx.destroy);
-
-        trx.commit();
+        await trx.commit();
 
         console.log("finished processing");
         console.log(arrecadacao);
-        return res.json(file);
+        return res.json({test,linha});
       });
     } catch (err) {
-      await trx.rollback();
-      return res.status(401).json({
-        error: "Unespected error",
-      });
+      console.log("esse aqui é o erro", err);
+      if (err.message === 'ER_DUP_ENTRY') {
+        return res.status(401).json({
+          error: "Arrecadação duplicada",
+        });
+      }else{
+
+        await trx.rollback();
+        return res.status(401).json({
+          error: "Unespected error",
+        });
+      }
     }
   }
   // async index(req, res) {}
