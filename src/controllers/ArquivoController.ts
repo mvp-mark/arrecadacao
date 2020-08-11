@@ -2,6 +2,10 @@ import connection from "../database/connection";
 import * as fs from "fs";
 import { stringify } from "querystring";
 import { Response, Request } from "express";
+import {attachOnDuplicateUpdate} from 'knex-on-duplicate-update';
+
+attachOnDuplicateUpdate();
+
 
 interface Acumulator {
   i: number;
@@ -12,15 +16,15 @@ class ArquivoController {
     var file = {};
     let i: any = 0;
     const filename = req.file.filename;
-    const arrecadacao = {
+    const arr = {
       arr: filename,
     };
-    console.log("passou por aqui", arrecadacao);
+    console.log("passou por aqui", arr);
 
     const trx = await connection.transaction();
     try {
-      fs.readFile(req.file.path, async function (err, data) {
-        if (err) throw err;
+    await  fs.readFile(req.file.path, async function (_err, data) {
+        // if (err) throw err;
         var array = data.toString().split("\n");
         var size = array.length;
         const first = array[0].toString();
@@ -50,14 +54,19 @@ class ArquivoController {
         console.log(test);
 
         await trx("arquivo")
-          .insert(test)
+          .insert(test)//.onDuplicateUpdate('nsaHeader')
           .then(() => {
             console.log("entrou o cabeçalho");
             // return res.json({ test });
           })
-          // .catch((err) => {
-          //   throw err;
-          // })
+          .catch((err) => {
+            // if(err.message === "ER_DUP_ENTRY"){
+            //   return res.status(401).json({
+            //     error: "Arrecadação duplicada",
+            //   });
+            // }
+            throw err;
+          })
           .finally(() => trx.destroy);
         // console.log(file);
 
@@ -97,36 +106,43 @@ class ArquivoController {
             // return res.json({ linha });
             // );
           })
-          // .catch((err) => {
-          //   trx.rollback();
-          //   // return res.status(400).json({
-          //   //   error: "Unexpected error while creating new class",
-          //   // });
-          //   throw err;
-          // })
+          .catch((err) => {
+            // trx.rollback();
+            // return res.status(400).json({
+            //   error: "Unexpected error while creating new class",
+            // });
+            throw err;
+          })
 
           .finally(() => trx.destroy);
 
         await trx.commit();
 
         console.log("finished processing");
-        console.log(arrecadacao);
-        return res.json({test,linha});
+        console.log(arr);
+        return res.json({ test, linha });
       });
     } catch (err) {
-      console.log("esse aqui é o erro", err);
-      if (err.message === 'ER_DUP_ENTRY') {
+      console.error(err)
+      // console.log("esse aqui é o erro", err);
+
+      if (err) {
         return res.status(401).json({
           error: "Arrecadação duplicada",
         });
-      }else{
 
+      } else {
         await trx.rollback();
         return res.status(401).json({
           error: "Unespected error",
         });
       }
     }
+  }
+  async index (req: Request, res: Response){
+  const index = await connection('arquivo').select('*');
+
+  return res.status(200).json({index})
   }
   // async index(req, res) {}
 }

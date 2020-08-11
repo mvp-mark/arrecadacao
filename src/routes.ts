@@ -15,5 +15,6 @@ const upload = multer(multerConfig);
 
 // routes.get("/post", upload.single("arr"), ArquivoController.index);
 routes.post("/post", upload.single('arr'), arquivoController.create);
+routes.get("/", arquivoController.index);
 
 export default routes;
