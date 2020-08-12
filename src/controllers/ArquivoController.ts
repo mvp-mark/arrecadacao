@@ -2,10 +2,10 @@ import connection from "../database/connection";
 import * as fs from "fs";
 import { stringify } from "querystring";
 import { Response, Request } from "express";
-import {attachOnDuplicateUpdate} from 'knex-on-duplicate-update';
+import { attachOnDuplicateUpdate } from "knex-on-duplicate-update";
+import { isNumber } from "util";
 
 attachOnDuplicateUpdate();
-
 
 interface Acumulator {
   i: number;
@@ -23,41 +23,57 @@ class ArquivoController {
 
     const trx = await connection.transaction();
     try {
-    await  fs.readFile(req.file.path, async function (_err, data) {
+      fs.readFile(req.file.path, async function (_err, data) {
         // if (err) throw err;
         var array = data.toString().split("\n");
+        let arr = 0;
+        let sum: number;
+        // var total;
         var size = array.length;
+        // var boletoValue = ;
         const first = array[0].toString();
 
         var last = array[size - 2];
-        const test = [
-          {
-            codRegHeader: first.substring(0, 1),
-            totalBoletos: "",
-            codShippHeader: first.substring(1, 2),
-            codAgreementHeader: first.substring(2, 22),
-            companyHeader: first.substring(22, 42),
-            codBankHeader: first.substring(42, 45),
-            bankNameHeader: first.substring(45, 65),
-            dateFileHeader: first.substring(65, 73),
-            nsaHeader: first.substring(73, 79),
-            layoutHeader: first.substring(79, 81),
-            barCodeHeader: first.substring(81, 98),
-            fillerHeader: first.substring(98, 150),
-            codRegTrailler: last.substring(0, 1),
-            tRegFileTrailler: last.substring(1, 7),
-            totalValueTrailler: last.substring(7, 24),
-            fillerTrailler: last.substring(24, 150),
-            originNameFile: req.file.filename,
-          },
-        ];
-        console.log(test);
+        var total = array.reduce((sum, value)=>{
 
-        await trx("arquivo")
-          .insert(test)//.onDuplicateUpdate('nsaHeader')
-          .then(() => {
-            console.log("entrou o cabeçalho");
+          
+        })
+        for (i in array) {
+          // i=i+1;
+          if (array[i].toString().startsWith("G")) {
+            sum = arr +parseInt(array[i].substring(81, 93));
+            total = total;
+          }
+        }
+        const headerFile = {
+          codRegHeader: first.substring(0, 1),
+          totalBoletos: total,
+          codShippHeader: first.substring(1, 2),
+          codAgreementHeader: first.substring(2, 22),
+          companyHeader: first.substring(22, 42),
+          codBankHeader: first.substring(42, 45),
+          bankNameHeader: first.substring(45, 65),
+          dateFileHeader: first.substring(65, 73),
+          nsaHeader: first.substring(73, 79),
+          layoutHeader: first.substring(79, 81),
+          barCodeHeader: first.substring(81, 98),
+          fillerHeader: first.substring(98, 150),
+          codRegTrailler: last.substring(0, 1),
+          tRegFileTrailler: last.substring(1, 7),
+          totalValueTrailler: last.substring(7, 24),
+          fillerTrailler: last.substring(24, 150),
+          originNameFile: req.file.filename,
+        };
+
+        console.log(headerFile);
+
+        const fileIds = await trx("arquivo")
+          .insert(headerFile)
+          // .returning('idHeader')//.onDuplicateUpdate('nsaHeader')
+          .then(([idHeader]) => {
+            console.log("entrou o cabeçalho", idHeader);
             // return res.json({ test });
+            return idHeader;
           })
           .catch((err) => {
             // if(err.message === "ER_DUP_ENTRY"){
@@ -69,7 +85,6 @@ class ArquivoController {
           })
           .finally(() => trx.destroy);
         // console.log(file);
-
         // function boletos() {
         let linha: any = [];
         var linhaBody = {};
@@ -120,17 +135,16 @@ class ArquivoController {
 
         console.log("finished processing");
         console.log(arr);
-        return res.json({ test, linha });
+        return res.status(200).json({ id: fileIds });
       });
     } catch (err) {
-      console.error(err)
+      console.error(err);
       // console.log("esse aqui é o erro", err);
 
       if (err) {
         return res.status(401).json({
           error: "Arrecadação duplicada",
         });
-
       } else {
         await trx.rollback();
         return res.status(401).json({
@@ -139,10 +153,10 @@ class ArquivoController {
       }
     }
   }
-  async index (req: Request, res: Response){
-  const index = await connection('arquivo').select('*');
+  async index(req: Request, res: Response) {
+    const index = await connection("arquivo").select("*");
 
-  return res.status(200).json({index})
+    return res.status(200).json(index);
   }
   // async index(req, res) {}
 }
