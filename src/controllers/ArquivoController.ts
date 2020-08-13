@@ -4,6 +4,8 @@ import { stringify } from "querystring";
 import { Response, Request } from "express";
 import { attachOnDuplicateUpdate } from "knex-on-duplicate-update";
 import { isNumber } from "util";
+import currency from "../utils/currency";
+import Test from "../utils/test";
 
 attachOnDuplicateUpdate();
 
@@ -34,20 +36,23 @@ class ArquivoController {
         const first = array[0].toString();
 
         var last = array[size - 2];
-        var total = array.reduce((sum, value)=>{
+        const totalValue = parseInt(last.substring(7, 24));
+        var total = last.substring(7, 24);
+        var one = Test(total);
 
-          
-        })
-        for (i in array) {
-          // i=i+1;
-          if (array[i].toString().startsWith("G")) {
-            sum = arr +parseInt(array[i].substring(81, 93));
-            total = total;
-          }
-        }
+        // var total = array.map((sum, value)=>{
+
+        // })
+        // for (i in array) {
+        //   // i=i+1;
+        //   if (array[i].toString().startsWith("G")) {
+        //     sum = arr +parseInt(array[i].substring(81, 93));
+        //     total = total;
+        //   }
+        // }
         const headerFile = {
           codRegHeader: first.substring(0, 1),
-          totalBoletos: total,
+          totalBoletos: " ",
           codShippHeader: first.substring(1, 2),
           codAgreementHeader: first.substring(2, 22),
           companyHeader: first.substring(22, 42),
@@ -60,7 +65,13 @@ class ArquivoController {
           fillerHeader: first.substring(98, 150),
           codRegTrailler: last.substring(0, 1),
           tRegFileTrailler: last.substring(1, 7),
-          totalValueTrailler: last.substring(7, 24),
+          totalValueTrailler: totalValue,
+          formatedtotalValueTrailler: one
+          .toLocaleString("pt-br", {
+            style: "currency",
+            currency: "BRL",
+          }),
+          // formatedtotalValueTrailler:"R$ "  +c?.value,
           fillerTrailler: last.substring(24, 150),
           originNameFile: req.file.filename,
         };

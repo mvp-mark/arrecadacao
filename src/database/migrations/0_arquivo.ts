@@ -2,24 +2,25 @@ import Knex from "knex";
 
 export async function up(knex: Knex) {
   return knex.schema.createTable("arquivo", (table) => {
-    table.increments("idHeader");
-    table.string("totalBoletos");
-    table.string("codRegHeader");
-    table.string("codShippHeader");
-    table.string("codAgreementHeader");
-    table.string("companyHeader");
-    table.string("codBankHeader");
-    table.string("bankNameHeader");
-    table.string("dateFileHeader");
-    table.string("nsaHeader").unique();
-    table.string("layoutHeader");
-    table.string("barCodeHeader");
-    table.string("fillerHeader");
-    table.string("codRegTrailler");
-    table.string("tRegFileTrailler");
-    table.string("totalValueTrailler");
+    table.increments("idHeader").notNullable();
+    table.string("totalBoletos").notNullable();
+    table.string("codRegHeader").notNullable();
+    table.string("codShippHeader").notNullable();
+    table.string("codAgreementHeader").notNullable();
+    table.string("companyHeader").notNullable();
+    table.string("codBankHeader").notNullable();
+    table.string("bankNameHeader").notNullable();
+    table.string("dateFileHeader").notNullable();
+    table.string("nsaHeader").unique().notNullable();
+    table.string("layoutHeader").notNullable();
+    table.string("barCodeHeader").notNullable();
+    table.string("fillerHeader").notNullable();
+    table.string("codRegTrailler").notNullable();
+    table.string("tRegFileTrailler").notNullable();
+    table.integer("totalValueTrailler").notNullable();
+    table.string("formatedtotalValueTrailler").notNullable();
     table.string("fillerTrailler");
-    table.string("originNameFile");
+    table.string("originNameFile").notNullable();
   });
 }
 
