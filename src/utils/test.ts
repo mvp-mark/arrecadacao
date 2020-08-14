@@ -5,5 +5,5 @@ export default function Test(total: string ) {
       fromCents: true,
     });
 
-    return formated;
+    return formated as unknown as Number;
 }

@@ -21,6 +21,8 @@ export async function up(knex: Knex) {
     table.string("formatedtotalValueTrailler").notNullable();
     table.string("fillerTrailler");
     table.string("originNameFile").notNullable();
+    table.timestamp('created_at').defaultTo(knex.fn.now());
+
   });
 }
 

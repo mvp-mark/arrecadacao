@@ -16,6 +16,8 @@ export async function up(knex: Knex) {
     table.string("authNumberBody");
     table.string("paymentFormBody");
     table.string("reservedFutureBody");
+    table.timestamp('created_at').defaultTo(knex.fn.now());
+
     table.string("idArquivo").notNullable();
     
     table.foreign('idArquivo').references("nsaHeader").inTable("arquivo");

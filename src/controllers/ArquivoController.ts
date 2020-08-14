@@ -39,7 +39,10 @@ class ArquivoController {
         const totalValue = parseInt(last.substring(7, 24));
         var total = last.substring(7, 24);
         var one = Test(total);
-
+       const formated = (one).toLocaleString("pt-br", {
+          style: "currency",
+          currency: "BRL",
+        })
         // var total = array.map((sum, value)=>{
 
         // })
@@ -66,11 +69,7 @@ class ArquivoController {
           codRegTrailler: last.substring(0, 1),
           tRegFileTrailler: last.substring(1, 7),
           totalValueTrailler: totalValue,
-          formatedtotalValueTrailler: one
-          .toLocaleString("pt-br", {
-            style: "currency",
-            currency: "BRL",
-          }),
+          formatedtotalValueTrailler: formated,
           // formatedtotalValueTrailler:"R$ "  +c?.value,
           fillerTrailler: last.substring(24, 150),
           originNameFile: req.file.filename,
@@ -168,6 +167,13 @@ class ArquivoController {
     const index = await connection("arquivo").select("*");
 
     return res.status(200).json(index);
+  }
+  async search(req: Request, res: Response){
+    const id =req.query.id
+    console.log("search id of recovery",id);
+    const search = await connection('arquivo').select("*").where("idHeader","=", id);
+      
+    return res.status(200).json(search);
   }
   // async index(req, res) {}
 }
