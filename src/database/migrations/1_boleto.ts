@@ -2,7 +2,7 @@ import Knex from "knex";
 
 export async function up(knex: Knex) {
   return knex.schema.createTable("boleto", table=> {
-    table.increments("idBoleto");
+    table.bigIncrements("idBoleto");
     table.string("codRegBody");
     table.string("idAgencyBody");
     table.string("datePaymentBody");

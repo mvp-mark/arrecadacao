@@ -54,25 +54,25 @@ class ArquivoController {
         //   }
         // }
         const headerFile = {
-          codRegHeader: first.substring(0, 1),
+          codRegHeader: first.substring(0, 1).trim(),
           totalBoletos: " ",
-          codShippHeader: first.substring(1, 2),
-          codAgreementHeader: first.substring(2, 22),
-          companyHeader: first.substring(22, 42),
-          codBankHeader: first.substring(42, 45),
-          bankNameHeader: first.substring(45, 65),
-          dateFileHeader: first.substring(65, 73),
-          nsaHeader: first.substring(73, 79),
-          layoutHeader: first.substring(79, 81),
-          barCodeHeader: first.substring(81, 98),
-          fillerHeader: first.substring(98, 150),
-          codRegTrailler: last.substring(0, 1),
-          tRegFileTrailler: last.substring(1, 7),
+          codShippHeader: first.substring(1, 2).trim(),
+          codAgreementHeader: first.substring(2, 22).trim(),
+          companyHeader: first.substring(22, 42).trim(),
+          codBankHeader: first.substring(42, 45).trim(),
+          bankNameHeader: first.substring(45, 65).trim(),
+          dateFileHeader: first.substring(65, 73).trim(),
+          nsaHeader: first.substring(73, 79).trim(),
+          layoutHeader: first.substring(79, 81).trim(),
+          barCodeHeader: first.substring(81, 98).trim(),
+          fillerHeader: first.substring(98, 150).trim(),
+          codRegTrailler: last.substring(0, 1).trim(),
+          tRegFileTrailler: last.substring(1, 7).trim(),
           totalValueTrailler: totalValue,
-          formatedtotalValueTrailler: formated,
+          formatedtotalValueTrailler: formated.trim(),
           // formatedtotalValueTrailler:"R$ "  +c?.value,
-          fillerTrailler: last.substring(24, 150),
-          originNameFile: req.file.filename,
+          fillerTrailler: last.substring(24, 150).trim(),
+          originNameFile: req.file.filename.trim(),
         };
 
         console.log(headerFile);
@@ -103,20 +103,20 @@ class ArquivoController {
           if (array[i].toString().startsWith("G")) {
             (linhaBody = {
               // PAGINA: i,
-              codRegBody: array[i].substring(0, 1),
-              idAgencyBody: array[i].substring(1, 21),
-              datePaymentBody: array[i].substring(21, 29),
-              dateCreditBody: array[i].substring(29, 37),
-              barCodeBody: array[i].substring(37, 81),
-              valueReciveBody: array[i].substring(81, 93),
-              valueTaxBody: array[i].substring(93, 100),
-              nsrBody: array[i].substring(100, 108),
-              codAgencyBody: array[i].substring(108, 116),
-              collectionBody: array[i].substring(116, 117),
-              authNumberBody: array[i].substring(117, 140),
-              paymentFormBody: array[i].substring(140, 141),
-              reservedFutureBody: array[i].substring(141, 150),
-              idArquivo: array[0].substring(73, 79),
+              codRegBody: array[i].substring(0, 1).trim(),
+              idAgencyBody: array[i].substring(1, 21).trim(),
+              datePaymentBody: array[i].substring(21, 29).trim(),
+              dateCreditBody: array[i].substring(29, 37).trim(),
+              barCodeBody: array[i].substring(37, 81).trim(),
+              valueReciveBody: array[i].substring(81, 93).trim(),
+              valueTaxBody: array[i].substring(93, 100).trim(),
+              nsrBody: array[i].substring(100, 108).trim(),
+              codAgencyBody: array[i].substring(108, 116).trim(),
+              collectionBody: array[i].substring(116, 117).trim(),
+              authNumberBody: array[i].substring(117, 140).trim(),
+              paymentFormBody: array[i].substring(140, 141).trim(),
+              reservedFutureBody: array[i].substring(141, 150).trim(),
+              idArquivo: array[0].substring(73, 79).trim(),
             }),
               // (linha[i - 1] = linhaBody);
               (linha[i - 1] = linhaBody);
@@ -145,11 +145,14 @@ class ArquivoController {
 
         console.log("finished processing");
         console.log(arr);
-        return res.status(200).json({ id: fileIds });
+        return res.status(200).json({ id: headerFile.nsaHeader });
       });
     } catch (err) {
       console.error(err);
       // console.log("esse aqui é o erro", err);
+      return res.status(401).json({
+        error: "Unespected error",
+      });
 
       if (err) {
         return res.status(401).json({
@@ -171,9 +174,11 @@ class ArquivoController {
   async search(req: Request, res: Response){
     const id =req.query.id
     console.log("search id of recovery",id);
-    const search = await connection('arquivo').select("*").where("idHeader","=", id);
+    const search = await connection('arquivo').select("*").where("nsaHeader","=", id);
+
+    const boletos = await connection('boleto').select('*').where("idArquivo","=", id)
       
-    return res.status(200).json(search);
+    return res.status(200).json({search, boletos});
   }
   // async index(req, res) {}
 }
